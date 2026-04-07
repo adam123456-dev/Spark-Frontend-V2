@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import SparkzLogo from '../components/SparkzLogo';
 
@@ -9,11 +10,17 @@ const passwordRules = [
 ];
 
 export default function Auth() {
+  const [searchParams] = useSearchParams();
   const [tab, setTab] = useState('signup');
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    const t = searchParams.get('tab');
+    if (t === 'signin' || t === 'signup') setTab(t);
+  }, [searchParams]);
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
 

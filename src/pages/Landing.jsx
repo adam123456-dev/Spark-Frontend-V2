@@ -16,7 +16,10 @@ const features = [
 ];
 
 export default function Landing() {
-  const goToAuth = (mode = 'signup') => { window.location.href = createPageUrl(`Auth?tab=${mode}`); };
+  const goToAuth = (mode = 'signup') => {
+    const tab = typeof mode === 'string' && (mode === 'signup' || mode === 'signin') ? mode : 'signup';
+    window.location.href = createPageUrl(`Auth?tab=${encodeURIComponent(tab)}`);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -30,7 +33,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => goToAuth('signin')} className="text-sm font-medium text-purple-200 hover:text-white transition-colors">Login</button>
-            <button onClick={goToAuth} className="px-4 py-2 bg-[#e6c33a] text-[#1e1b4b] text-sm font-bold rounded-lg hover:bg-[#d4b034] transition-colors">Get Started</button>
+            <button type="button" onClick={() => goToAuth('signup')} className="px-4 py-2 bg-[#e6c33a] text-[#1e1b4b] text-sm font-bold rounded-lg hover:bg-[#d4b034] transition-colors">Get Started</button>
           </div>
         </div>
       </nav>
@@ -52,7 +55,7 @@ export default function Landing() {
               Upload financial statements, select your framework, and get instant compliance insights. Save hours of manual review.
             </p>
             <div className="flex items-center gap-4 flex-wrap">
-              <button onClick={goToAuth} className="flex items-center gap-2 px-6 py-3 bg-[#e6c33a] text-[#1e1b4b] font-bold rounded-xl hover:bg-[#d4b034] transition-colors">
+              <button type="button" onClick={() => goToAuth('signup')} className="flex items-center gap-2 px-6 py-3 bg-[#e6c33a] text-[#1e1b4b] font-bold rounded-xl hover:bg-[#d4b034] transition-colors">
                 Start your free analysis →
               </button>
               <button className="px-6 py-3 border border-white/20 text-white font-semibold rounded-xl hover:bg-white/10 transition-colors">
@@ -126,7 +129,8 @@ export default function Landing() {
                 <div className={`text-xs mb-4 ${plan.highlight ? 'text-purple-300' : 'text-gray-400'}`}>/mo</div>
                 <div className={`text-sm font-medium mb-6 ${plan.highlight ? 'text-purple-200' : 'text-gray-600'}`}>{plan.analyses}</div>
                 <button
-                  onClick={goToAuth}
+                  type="button"
+                  onClick={() => goToAuth('signup')}
                   className={`mt-auto py-2.5 rounded-xl text-sm font-bold transition-colors ${plan.highlight ? 'bg-[#e6c33a] text-[#1e1b4b] hover:bg-[#d4b034]' : 'bg-[#1e1b4b] text-white hover:opacity-90'}`}
                 >
                   {plan.cta}
@@ -143,7 +147,7 @@ export default function Landing() {
           <h2 className="text-3xl font-black text-white mb-3">Ready to automate your disclosures?</h2>
           <p className="text-purple-200 mb-8">Join hundreds of accounting firms saving hours on compliance every week.</p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <button onClick={goToAuth} className="px-6 py-3 bg-[#e6c33a] text-[#1e1b4b] font-bold rounded-xl hover:bg-[#d4b034] transition-colors">Start your free analysis</button>
+            <button type="button" onClick={() => goToAuth('signup')} className="px-6 py-3 bg-[#e6c33a] text-[#1e1b4b] font-bold rounded-xl hover:bg-[#d4b034] transition-colors">Start your free analysis</button>
             <button className="px-6 py-3 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-colors">Schedule a demo</button>
           </div>
         </div>
