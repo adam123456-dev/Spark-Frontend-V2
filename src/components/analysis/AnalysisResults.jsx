@@ -18,19 +18,6 @@ const STATUS_LABELS = {
 const OVERRIDE_OPTIONS = ['', 'met', 'partially_met', 'missing', 'not_applicable'];
 const OVERRIDE_LABELS  = { '': '— no override —', met: 'Met', partially_met: 'Partially Met', missing: 'Missing', not_applicable: 'N/A' };
 
-function confidenceLabel(conf) {
-  if (conf == null) return '';
-  const pct = Math.round(conf * 100);
-  return `${pct}%`;
-}
-
-function confidenceStyle(conf) {
-  if (conf == null) return 'bg-gray-100 text-gray-500';
-  if (conf >= 0.7)  return 'bg-green-100 text-green-700';
-  if (conf >= 0.4)  return 'bg-amber-100 text-amber-700';
-  return 'bg-red-100 text-red-600';
-}
-
 function ResultRow({ item, runId }) {
   const [expanded, setExpanded]     = useState(false);
   const [override, setOverride]     = useState(item.human_override || '');
@@ -62,25 +49,20 @@ function ResultRow({ item, runId }) {
         <td className="px-4 py-3 text-xs font-mono text-gray-500 whitespace-nowrap">{item.item_id}</td>
         <td className="px-4 py-3 text-sm text-gray-800 font-medium max-w-xs truncate">{item.requirement}</td>
         <td className="px-4 py-3">
-          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[effectiveStatus] || STATUS_STYLES.not_applicable}`}>
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[effectiveStatus] || STATUS_STYLES.not_applicable}`}>
             {STATUS_LABELS[effectiveStatus] || effectiveStatus}
-            {override && <span className="ml-1 opacity-60">(override)</span>}
+            {override && <span className="opacity-60">(override)</span>}
+            {item.reviewer_changed === 1 && (
+              <span className="text-orange-600 font-semibold" title="Reviewer corrected the initial assessment">✎</span>
+            )}
           </span>
-        </td>
-        <td className="px-4 py-3">
-          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${confidenceStyle(item.confidence)}`}>
-            {confidenceLabel(item.confidence)}
-          </span>
-          {item.reviewer_changed === 1 && (
-            <span className="ml-1.5 text-xs text-orange-500 font-semibold" title="Reviewer corrected the initial assessment">✎</span>
-          )}
         </td>
         <td className="px-4 py-3 text-gray-400 text-sm">{expanded ? '▲' : '▼'}</td>
       </tr>
 
       {expanded && (
         <tr className="bg-[#f8f8fb] border-t border-gray-100">
-          <td colSpan={5} className="px-6 py-4 space-y-4">
+          <td colSpan={4} className="px-6 py-4 space-y-4">
             {item.requirement_full && item.requirement_full !== item.requirement && (
               <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Full requirement (with parent context)</p>
@@ -177,27 +159,8 @@ export default function AnalysisResults({ results, runId }) {
     window.open(sparkzApi.exportUrl(runId), '_blank');
   };
 
-  // Priority review: reviewer changed or confidence < 0.7
-  const priorityItems = results.filter(r => r.reviewer_changed === 1 || (r.confidence != null && r.confidence < 0.7));
-
   return (
     <div className="space-y-4">
-      {/* Priority review panel */}
-      {priorityItems.length > 0 && (
-        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5">
-          <p className="text-sm font-bold text-orange-800 mb-2">Priority Review ({priorityItems.length} items)</p>
-          <p className="text-xs text-orange-600 mb-3">These items were corrected by the reviewer or have low confidence. Please verify manually.</p>
-          <ul className="space-y-1">
-            {priorityItems.slice(0, 8).map(r => (
-              <li key={r.item_id} className="text-xs text-orange-700">
-                <span className="font-mono font-semibold">{r.item_id}</span> — {r.requirement?.slice(0, 80)}{r.requirement?.length > 80 ? '...' : ''}
-              </li>
-            ))}
-            {priorityItems.length > 8 && <li className="text-xs text-orange-500">...and {priorityItems.length - 8} more</li>}
-          </ul>
-        </div>
-      )}
-
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2 flex-wrap">
@@ -235,8 +198,8 @@ export default function AnalysisResults({ results, runId }) {
           <table className="w-full">
             <thead>
               <tr className="bg-[#f6f6f8]">
-                {['Item ID', 'Requirement', 'Status', 'Confidence', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
+                {['Item ID', 'Requirement', 'Status', ''].map(h => (
+                  <th key={h || 'expand'} className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -245,7 +208,7 @@ export default function AnalysisResults({ results, runId }) {
                 <ResultRow key={item.item_id} item={item} runId={runId} />
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-400">No results match your filters.</td></tr>
+                <tr><td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-400">No results match your filters.</td></tr>
               )}
             </tbody>
           </table>

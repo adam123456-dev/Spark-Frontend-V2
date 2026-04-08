@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { createPageUrl } from '@/utils';
 import SparkzLogo from '../components/SparkzLogo';
 import ApiHealthBanner from '../components/ApiHealthBanner';
 import AnalysisForm from '../components/analysis/AnalysisForm';
@@ -49,6 +48,10 @@ export default function Analysis() {
   const lastProgressAt = useRef(null);
   const stallWarnedRef = useRef(false);
   const progressRef = useRef(null);
+
+  useEffect(() => {
+    sparkzApi.health().catch(() => {});
+  }, []);
 
   // Elapsed time + stall detection ticker
   useEffect(() => {
@@ -113,7 +116,7 @@ export default function Analysis() {
       es.close();
       const aiStages = ['assess', 'review'];
       const msg = aiStages.includes(lastStage)
-        ? 'Lost connection during AI processing — the analysis may still be running. Please wait a moment and check History.'
+        ? 'Lost connection during AI processing — the run may still finish on the server. Wait a minute and try again, or re-upload the PDF.'
         : 'Lost connection to the analysis server. Please try again.';
       setError(msg);
       setLoading(false);
@@ -156,12 +159,7 @@ export default function Analysis() {
       <header className="bg-[#1e1b4b] border-b border-white/10 sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <SparkzLogo size="sm" variant="light" />
-          <nav className="flex gap-6 text-sm text-purple-200">
-            <button onClick={() => window.location.href = createPageUrl('Dashboard')} className="hover:text-white">Dashboard</button>
-            <button onClick={() => window.location.href = createPageUrl('History')} className="hover:text-white">History</button>
-            <button className="text-white font-semibold">Analysis</button>
-          </nav>
-          <div className="w-8 h-8 rounded-full bg-[#e6c33a] flex items-center justify-center text-[#1e1b4b] text-xs font-bold">AR</div>
+          <span className="text-xs text-purple-300 font-medium hidden sm:inline">Disclosure checklist analysis</span>
         </div>
       </header>
 
